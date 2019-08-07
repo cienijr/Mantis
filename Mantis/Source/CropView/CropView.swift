@@ -604,20 +604,24 @@ extension CropView {
 
 // public api
 extension CropView {
-    func crop() -> UIImage? {
+
+    func cropInfo() -> CropInfo {
         let rect = imageContainer.convert(imageContainer.bounds,
                                           to: self)
         let point = rect.center
         let zeroPoint = gridOverlayView.center
-        
+
         let translation =  CGPoint(x: (point.x - zeroPoint.x), y: (point.y - zeroPoint.y))
-        
-        let info = CropInfo(translation: translation,
-                            rotation: viewModel.getTotalRadians(),
-                            scale: scrollView.zoomScale,
-                            cropSize: gridOverlayView.frame.size,
-                            imageViewSize: imageContainer.bounds.size)
-        return image.getCroppedImage(byCropInfo: info)
+
+        return CropInfo(translation: translation,
+                        rotation: viewModel.getTotalRadians(),
+                        scale: scrollView.zoomScale,
+                        cropSize: gridOverlayView.frame.size,
+                        imageViewSize: imageContainer.bounds.size)
+    }
+
+    func crop() -> UIImage? {
+        return image.getCroppedImage(byCropInfo: cropInfo())
     }
         
     func handleRotate() {

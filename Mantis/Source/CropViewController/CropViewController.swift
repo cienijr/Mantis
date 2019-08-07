@@ -24,8 +24,10 @@
 
 import UIKit
 
-public protocol CropViewControllerProtocal: class {
-    func didGetCroppedImage(image: UIImage)
+public protocol CropViewControllerDelegate: class {
+
+    func cropViewController(_ cropViewController: CropViewController, didCropImageWithInfo cropInfo: CropInfo)
+    func cropViewControllerDidCancel(_ cropViewController: CropViewController)
 }
 
 public enum CropViewControllerMode {
@@ -35,7 +37,7 @@ public enum CropViewControllerMode {
 
 public class CropViewController: UIViewController {
     
-    public weak var delegate: CropViewControllerProtocal?
+    public weak var delegate: CropViewControllerDelegate?
     
     private var orientation: UIInterfaceOrientation = .unknown
         
@@ -156,7 +158,7 @@ public class CropViewController: UIViewController {
     }
     
     private func handleCancel() {
-        dismiss(animated: true, completion: nil)
+        delegate?.cropViewControllerDidCancel(self)
     }
     
     @objc private func handleSetRatio() {
@@ -200,13 +202,11 @@ public class CropViewController: UIViewController {
     }
     
     private func handleCrop() {
-        guard let image = cropView?.crop() else {
+        guard let cropInfo = cropView?.cropInfo() else {
             return
         }
-        
-        dismiss(animated: true) {
-            self.delegate?.didGetCroppedImage(image: image)
-        }
+
+        delegate?.cropViewController(self, didCropImageWithInfo: cropInfo)
     }
 }
 
@@ -269,14 +269,5 @@ extension CropViewController: CropViewDelegate {
     
     func cropViewDidBecomeNonResettable(_ cropView: CropView) {
         cropToolbar?.resetButton?.isHidden = true
-    }
-}
-
-// API
-extension CropViewController {
-    public func crop() {
-        if let image = cropView?.crop() {
-            delegate?.didGetCroppedImage(image: image)
-        }        
     }
 }
